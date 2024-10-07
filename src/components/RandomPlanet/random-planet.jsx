@@ -1,37 +1,43 @@
 import { useState, useEffect } from 'react'
 import { getPlanet } from '@/services/swapiService'
+import Spinner from '@/components/Spinner'
+import ErrorIndicator from '@/components/ErrorIndicator'
+import PropTypes from 'prop-types'
 import './random-planet.css'
 
 export default function RandomPlanet() {
-  const [planet, setPlanet] = useState({
-    id: '',
-    name: '',
-    population: '',
-    rotationPeriod: '',
-    diameter: ''
-  })
-
-  useEffect(() => {
-    updatePlanet()
-  }, [])
+  const [planet, setPlanet] = useState({})
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   const updatePlanet = () => {
     const id = Math.floor(Math.random() * 10) + 1
-    getPlanet(id).then(planet => {
-      setPlanet({
-        id,
-        name: planet.name,
-        population: planet.population,
-        rotationPeriod: planet.rotation_period,
-        diameter: planet.diameter
+    return getPlanet(id)
+      .then(planet => setPlanet(planet))
+      .catch(() => {
+        setError(true)
+        setIsLoading(false)
       })
-    })
   }
+
+  useEffect(() => {
+    setIsLoading(true)
+    updatePlanet().then(() => setIsLoading(false))
+  }, [])
 
   return (
     <div className='random-planet jumbotron rounded'>
+      {isLoading ? <Spinner /> : error ? <ErrorIndicator /> : <PlanetView planet={planet} />}
+    </div>
+  )
+}
+
+function PlanetView({ planet = {} }) {
+  return (
+    <>
       <img
         className='planet-image'
+        alt={planet.name}
         src={`https://starwars-visualguide.com/assets/img/planets/${planet.id}.jpg`}
       />
       <div>
@@ -51,6 +57,16 @@ export default function RandomPlanet() {
           </li>
         </ul>
       </div>
-    </div>
+    </>
   )
+}
+
+PlanetView.propTypes = {
+  planet: PropTypes.shape({
+    id: PropTypes.number,
+    name: PropTypes.string,
+    population: PropTypes.string,
+    rotationPeriod: PropTypes.string,
+    diameter: PropTypes.string
+  })
 }

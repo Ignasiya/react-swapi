@@ -10,27 +10,69 @@ const getResource = async url => {
 
 export const getAllPeople = async () => {
   const res = await getResource('people')
-  return res.results
+  return res.results.map(transformPerson)
 }
 
 export const getPerson = async id => {
-  return await getResource(`people/${id}/`)
+  const person = await getResource(`people/${id}/`)
+  return transformPerson(person)
 }
 
 export const getAllStarships = async () => {
   const res = await getResource(`starships`)
-  return res.results
+  return res.results.map(transformStarship)
 }
 
 export const getStarship = async id => {
-  return await getResource(`starships/${id}`)
+  const starship = await getResource(`starships/${id}`)
+  return transformStarship(starship)
 }
 
 export const getAllPlanets = async () => {
   const res = await getResource('planets')
-  return res.results
+  return res.results.map(transformPlanet)
 }
 
 export const getPlanet = async id => {
-  return await getResource(`planets/${id}`)
+  const planet = await getResource(`planets/${id}`)
+  return transformPlanet(planet)
+}
+
+const extractId = item => {
+  const idRexExp = /\/([0-9]*)\/$/
+  return item.url.match(idRexExp)[1]
+}
+
+const transformPlanet = planet => {
+  return {
+    id: extractId(planet),
+    name: planet.name,
+    population: planet.population,
+    rotationPeriod: planet.rotation_period,
+    diameter: planet.diameter
+  }
+}
+
+const transformPerson = person => {
+  return {
+    id: extractId(person),
+    name: person.name,
+    birthYear: person.birth_year,
+    gender: person.gender,
+    eyeColor: person.eye_color
+  }
+}
+
+const transformStarship = starship => {
+  return {
+    id: extractId(starship),
+    name: starship.name,
+    model: starship.model,
+    manufacturer: starship.manufacturer,
+    costInCredits: starship.cost_in_credits,
+    length: starship.length,
+    crew: starship.crew,
+    passengers: starship.passengers,
+    cargoCapacity: starship.cargo_capacity
+  }
 }
