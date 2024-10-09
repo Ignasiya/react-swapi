@@ -13,7 +13,10 @@ export default function RandomPlanet() {
   const updatePlanet = () => {
     const id = Math.floor(Math.random() * 10) + 1
     return getPlanet(id)
-      .then(planet => setPlanet(planet))
+      .then(planet => {
+        setPlanet(planet)
+        setError(false)
+      })
       .catch(() => {
         setError(true)
         setIsLoading(false)
@@ -23,6 +26,13 @@ export default function RandomPlanet() {
   useEffect(() => {
     setIsLoading(true)
     updatePlanet().then(() => setIsLoading(false))
+
+    const intervalId = setInterval(() => {
+      setIsLoading(true)
+      updatePlanet().then(() => setIsLoading(false))
+    }, 10000)
+
+    return () => clearInterval(intervalId)
   }, [])
 
   return (
@@ -63,7 +73,7 @@ function PlanetView({ planet = {} }) {
 
 PlanetView.propTypes = {
   planet: PropTypes.shape({
-    id: PropTypes.number,
+    id: PropTypes.string,
     name: PropTypes.string,
     population: PropTypes.string,
     rotationPeriod: PropTypes.string,
